@@ -2,418 +2,650 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Document Data</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everest RPG Expedition</title>
     <style>
-        /* Ultra simple style to avoid suspicion */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #f4f4f4;
-            color: #333;
-            font-family: monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a252f;
+            color: #ecf0f1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-        
-        /* The hidden trigger */
-        #void-text {
-            cursor: pointer;
-            color: #dcdcdc;
-            user-select: none;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Login elements */
-        #login-container {
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        input {
-            padding: 5px;
-            font-family: monospace;
-            border: 1px solid #ccc;
-            background: #fff;
-            width: 150px;
-        }
-        
-        button {
-            padding: 5px;
-            font-family: monospace;
-            border: 1px solid #ccc;
-            background: #eee;
-            cursor: pointer;
+        .game-wrapper {
+            display: flex;
+            flex-direction: row;
+            background: #2c3e50;
+            border-radius: 12px;
+            padding: 25px;
+            width: 100%;
+            max-width: 950px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            gap: 25px;
         }
 
-        /* Game Hub Menu */
-        #menu-container {
-            display: none;
+        .left-panel {
+            flex: 1.3;
+            display: flex;
             flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .right-panel {
+            flex: 0.7;
+            background: #22313f;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+            min-height: 500px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #3498db;
+            font-size: 1.8rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            margin-bottom: 15px;
+            background: #34495e;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            font-size: 0.95rem;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .shop-box {
+            background: #2c3e50;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .shop-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 8px;
+            text-transform: uppercase;
             text-align: center;
         }
 
-        /* Game Container */
-        #game-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        canvas {
-            background-color: #111;
-            border: 2px solid #333;
-            max-width: 90vw;
-            max-height: 50vh;
-        }
-        
-        /* Phone Touch Controls */
-        .controls {
-            margin-top: 15px;
+        .shop-grid {
             display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(2, 50px);
-            gap: 5px;
-            justify-content: center;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
 
-        .ctrl-btn {
-            border: 1px solid #ccc;
-            background: #eee;
-            font-family: monospace;
+        .btn-shop {
+            background: #16a085;
+            color: white;
+            font-size: 0.8rem;
+            padding: 6px;
+        }
+        .btn-shop:hover { background: #1abc9c; }
+
+        .log-box {
+            background: #1a252f;
+            border: 1px solid #7f8c8d;
+            border-radius: 6px;
+            height: 120px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-left: 3px solid #3498db;
+            padding-left: 6px;
+        }
+        .log-danger { border-left-color: #e74c3c; color: #e74c3c; }
+        .log-success { border-left-color: #2ecc71; color: #2ecc71; }
+        .log-warning { border-left-color: #f1c40f; color: #f1c40f; }
+
+        .btn-group {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .brk-controls {
-            margin-top: 15px;
-            display: flex;
-            gap: 20px;
+        .btn-climb { background: #2ecc71; color: white; }
+        .btn-climb:hover { background: #27ae60; }
+        .btn-descend { background: #3498db; color: white; }
+        .btn-descend:hover { background: #2980b9; }
+        .btn-rest { background: #e67e22; color: white; }
+        .btn-rest:hover { background: #d35400; }
+        .btn-oxygen { background: #9b59b6; color: white; }
+        .btn-oxygen:hover { background: #8e44ad; }
+        .btn-abort { background: #7f8c8d; color: white; }
+        .btn-abort:hover { background: #95a5a6; }
+
+        button:disabled {
+            background: #7f8c8d !important;
+            color: #bdc3c7 !important;
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
-        .brk-btn {
-            width: 80px;
-            height: 50px;
-            border: 1px solid #ccc;
-            background: #eee;
-            font-family: monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            cursor: pointer;
+        .mountain-container {
+            position: relative;
+            width: 100%;
+            height: 460px;
+        }
+
+        .mountain-shape {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 110px solid transparent;
+            border-right: 110px solid transparent;
+            border-bottom: 440px solid #7f8c8d;
+        }
+
+        .mountain-cap {
+            position: absolute;
+            bottom: 308px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 33px solid transparent;
+            border-right: 33px solid transparent;
+            border-bottom: 132px solid #ecf0f1;
+            pointer-events: none;
+        }
+
+        .camp-marker {
+            position: absolute;
+            left: 55%;
+            font-size: 0.75rem;
+            color: #bdc3c7;
+            border-bottom: 1px dashed rgba(255,255,255,0.3);
+            width: 110px;
+            padding-bottom: 2px;
+        }
+        .camp-marker::before {
+            content: '⛺';
+            position: absolute;
+            left: -22px;
+            font-size: 0.85rem;
+        }
+        .summit-marker::before {
+            content: '🚩';
+        }
+
+        .climber {
+            position: absolute;
+            left: 45%;
+            font-size: 1.6rem;
+            z-index: 10;
+            transition: bottom 0.5s ease-out;
+            transform: translate(-50%, 50%);
+        }
+
+        .climbing-animation {
+            animation: bounce 0.3s ease infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translate(-50%, 50%) translateY(0); }
+            100% { transform: translate(-50%, 50%) translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .game-wrapper { flex-direction: column; }
+            .right-panel { min-height: 480px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="void-text">void</div>
-
-    <div id="login-container">
-        <input type="text" id="user" placeholder="username" autocomplete="off">
-        <input type="password" id="pass" placeholder="password">
-        <button onclick="checkLogin()">enter</button>
-    </div>
-
-    <div id="menu-container">
-        <div>select game:</div>
-        <button onclick="startSnake()">1. snake</button>
-        <button onclick="startBricks()">2. bricks</button>
-    </div>
-
-    <div id="game-container">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div id="touch-controls"></div>
-    </div>
-
-    <script>
-        const voidText = document.getElementById('void-text');
-        const loginContainer = document.getElementById('login-container');
-        const menuContainer = document.getElementById('menu-container');
-        const gameContainer = document.getElementById('game-container');
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const touchControls = document.getElementById('touch-controls');
-
-        let currentGameInterval = null;
-
-        // Reveal login when void is clicked
-        voidText.addEventListener('click', () => {
-            voidText.style.display = 'none';
-            loginContainer.style.display = 'flex';
-            document.getElementById('user').focus();
-        });
-
-        document.getElementById('pass').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') checkLogin();
-        });
-
-        function checkLogin() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-
-            if (user === 'konstas0002' && pass === 'loveyoulove') {
-                loginContainer.style.display = 'none';
-                menuContainer.style.display = 'flex';
-            } else {
-                document.getElementById('user').value = '';
-                document.getElementById('pass').value = '';
-                loginContainer.style.display = 'none';
-                voidText.style.display = 'block';
-            }
-        }
-
-        function clearCurrentGame() {
-            if (currentGameInterval) clearInterval(currentGameInterval);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            touchControls.innerHTML = '';
-        }
-
-        // --- GAME 1: SNAKE ---
-        function startSnake() {
-            menuContainer.style.display = 'none';
-            gameContainer.style.display = 'flex';
-            clearCurrentGame();
-
-            // Mobile layout for snake
-            touchControls.innerHTML = `
-                <div class="controls">
-                    <div></div><div class="ctrl-btn" id="btn-up">U</div><div></div>
-                    <div class="ctrl-btn" id="btn-left">L</div><div class="ctrl-btn" id="btn-down">D</div><div class="ctrl-btn" id="btn-right">R</div>
-                </div>
-            `;
-
-            const box = 20;
-            let snake = [{ x: 10 * box, y: 10 * box }];
-            let food = {
-                x: Math.floor(Math.random() * 19 + 1) * box,
-                y: Math.floor(Math.random() * 19 + 1) * box
-            };
-            let d = "";
-            let score = 0;
-
-            // Keyboard input
-            document.addEventListener("keydown", handleKey);
-            function handleKey(e) {
-                if([37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
-                if (e.keyCode == 37 && d != "RIGHT") d = "LEFT";
-                else if (e.keyCode == 38 && d != "DOWN") d = "UP";
-                else if (e.keyCode == 39 && d != "LEFT") d = "RIGHT";
-                else if (e.keyCode == 40 && d != "UP") d = "DOWN";
-            }
-
-            // Touch inputs
-            document.getElementById('btn-up').addEventListener('touchstart', () => { if(d != "DOWN") d = "UP"; });
-            document.getElementById('btn-down').addEventListener('touchstart', () => { if(d != "UP") d = "DOWN"; });
-            document.getElementById('btn-left').addEventListener('touchstart', () => { if(d != "RIGHT") d = "LEFT"; });
-            document.getElementById('btn-right').addEventListener('touchstart', () => { if(d != "LEFT") d = "RIGHT"; });
-
-            function draw() {
-                ctx.fillStyle = "#111";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                for (let i = 0; i < snake.length; i++) {
-                    ctx.fillStyle = (i == 0) ? "#00FF00" : "#FFFFFF";
-                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                }
-
-                ctx.fillStyle = "#FF0000";
-                ctx.fillRect(food.x, food.y, box, box);
-
-                let snakeX = snake[0].x;
-                let snakeY = snake[0].y;
-
-                if (d == "LEFT") snakeX -= box;
-                if (d == "UP") snakeY -= box;
-                if (d == "RIGHT") snakeX += box;
-                if (d == "DOWN") snakeY += box;
-
-                if (snakeX == food.x && snakeY == food.y) {
-                    score++;
-                    food = {
-                        x: Math.floor(Math.random() * 19 + 1) * box,
-                        y: Math.floor(Math.random() * 19 + 1) * box
-                    };
-                } else {
-                    snake.pop();
-                }
-
-                let newHead = { x: snakeX, y: snakeY };
-
-                if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
-                    clearInterval(currentGameInterval);
-                    gameOverScreen(score);
-                    return;
-                }
-
-                snake.unshift(newHead);
-            }
-
-            function collision(head, array) {
-                for (let i = 0; i < array.length; i++) {
-                    if (head.x == array[i].x && head.y == array[i].y) return true;
-                }
-                return false;
-            }
-
-            currentGameInterval = setInterval(draw, 130);
-        }
-
-        // --- GAME 2: BRICK BREAKER ---
-        function startBricks() {
-            menuContainer.style.display = 'none';
-            gameContainer.style.display = 'flex';
-            clearCurrentGame();
-
-            touchControls.innerHTML = `
-                <div class="brk-controls">
-                    <div class="brk-btn" id="brk-left">LEFT</div>
-                    <div class="brk-btn" id="brk-right">RIGHT</div>
-                </div>
-            `;
-
-            let paddleHeight = 10;
-            let paddleWidth = 75;
-            let paddleX = (canvas.width - paddleWidth) / 2;
-            let rightPressed = false;
-            let leftPressed = false;
-
-            let x = canvas.width / 2;
-            let y = canvas.height - 30;
-            let dx = 3;
-            let dy = -3;
-            let ballRadius = 6;
-
-            let brickRowCount = 4;
-            let brickColumnCount = 5;
-            let brickWidth = 65;
-            let brickHeight = 15;
-            let brickPadding = 10;
-            let brickOffsetTop = 30;
-            let brickOffsetLeft = 20;
-            let score = 0;
-
-            let bricks = [];
-            for (let c = 0; c < brickColumnCount; c++) {
-                bricks[c] = [];
-                for (let r = 0; r < brickRowCount; r++) {
-                    bricks[c][r] = { x: 0, y: 0, status: 1 };
-                }
-            }
-
-            document.addEventListener("keydown", keyDownHandler);
-            document.addEventListener("keyup", keyUpHandler);
-
-            function keyDownHandler(e) {
-                if (e.keyCode == 39) rightPressed = true;
-                else if (e.keyCode == 37) leftPressed = true;
-            }
-            function keyUpHandler(e) {
-                if (e.keyCode == 39) rightPressed = false;
-                else if (e.keyCode == 37) leftPressed = false;
-            }
-
-            // Touch event listeners
-            const bLeft = document.getElementById('brk-left');
-            const bRight = document.getElementById('brk-right');
-            bLeft.addEventListener('touchstart', (e) => { e.preventDefault(); leftPressed = true; });
-            bLeft.addEventListener('touchend', () => leftPressed = false);
-            bRight.addEventListener('touchstart', (e) => { e.preventDefault(); rightPressed = true; });
-            bRight.addEventListener('touchend', () => rightPressed = false);
-
-            function collisionDetection() {
-                for (let c = 0; c < brickColumnCount; c++) {
-                    for (let r = 0; r < brickRowCount; r++) {
-                        let b = bricks[c][r];
-                        if (b.status == 1) {
-                            if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-                                dy = -dy;
-                                b.status = 0;
-                                score++;
-                                if (score == brickRowCount * brickColumnCount) {
-                                    clearInterval(currentGameInterval);
-                                    gameOverScreen("WIN!");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            function draw() {
-                ctx.fillStyle = "#111";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw Bricks
-                for (let c = 0; c < brickColumnCount; c++) {
-                    for (let r = 0; r < brickRowCount; r++) {
-                        if (bricks[c][r].status == 1) {
-                            let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
-                            let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
-                            bricks[c][r].x = brickX;
-                            bricks[c][r].y = brickY;
-                            ctx.fillStyle = "#00FF00";
-                            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-                        }
-                    }
-                }
-
-                // Draw Ball
-                ctx.beginPath();
-                ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-                ctx.fillStyle = "#FFFFFF";
-                ctx.fill();
-                ctx.closePath();
-
-                // Draw Paddle
-                ctx.fillStyle = "#FFFFFF";
-                ctx.fillRect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
-
-                collisionDetection();
-
-                if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
-                if (y + dy < ballRadius) dy = -dy;
-                else if (y + dy > canvas.height - ballRadius - 5) {
-                    if (x > paddleX && x < paddleX + paddleWidth) {
-                        dy = -dy;
-                    } else {
-                        clearInterval(currentGameInterval);
-                        gameOverScreen(score);
-                        return;
-                    }
-                }
-
-                if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
-                else if (leftPressed && paddleX > 0) paddleX -= 5;
-
-                x += dx;
-                y += dy;
-            }
-
-            currentGameInterval = setInterval(draw, 15);
-        }
-
-        function gameOverScreen(finalScore) {
-            ctx.fillStyle = "#111";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            ctx.font = "18px monospace";
-            ctx.fillText("Result: " + finalScore, 130, canvas.height / 2 - 20);
+<div class="game-wrapper">
+    <div class="left-panel">
+        <div>
+            <h1>Everest Expedition</h1>
             
-            touchControls.innerHTML = `<button onclick="returnToMenu()">Menu</button>`;
+            <div class="stats-grid">
+                <div class="stat-item">Location: <span id="lbl-location" class="stat-value">Base Camp</span></div>
+                <div class="stat-item">Altitude: <span id="lbl-altitude" class="stat-value">5,364m</span></div>
+                <div class="stat-item">Stamina: <span id="lbl-stamina" class="stat-value">100%</span></div>
+                <div class="stat-item">Coins: <span id="lbl-coins" class="stat-value" style="color: #f1c40f;">🪙 0</span></div>
+                <div class="stat-item">O2 Tanks: <span id="lbl-oxygen" class="stat-value">3</span></div>
+                <div class="stat-item">Weather: <span id="lbl-weather" class="stat-value">Clear</span></div>
+                <div class="stat-item">Day: <span id="lbl-day" class="stat-value">1</span></div>
+                <div class="stat-item">Gear Tier: <span id="lbl-gear" class="stat-value">Lvl 1</span></div>
+            </div>
+
+            <div class="shop-box">
+                <div class="shop-title">Base Camp Market</div>
+                <div class="shop-grid">
+                    <button class="btn-shop" id="btn-buy-o2" onclick="buyOxygen()">+1 Oxygen (15 🪙)</button>
+                    <button class="btn-shop" id="btn-buy-gear" onclick="buyGear()">Upgrade Clothes (30 🪙)</button>
+                    <button class="btn-shop" id="btn-buy-sherpa" onclick="buySherpa()">Hire Sherpa Guide (50 🪙)</button>
+                    <div style="font-size: 0.72rem; color: #bdc3c7; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px;">
+                        Sherpas reduce daily stamina drain by 25%!
+                    </div>
+                </div>
+            </div>
+
+            <div id="log-box" class="log-box">
+                <div class="log-entry log-success">Expedition launched! Coins are scarcer now. Climb to earn, or Descend to safety if stamina runs thin!</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div class="btn-row">
+                <button id="btn-climb" class="btn-climb" onclick="actionClimb()">Push Upward</button>
+                <button id="btn-descend" class="btn-descend" onclick="actionDescend()">Descend</button>
+            </div>
+            <div class="btn-row">
+                <button id="btn-rest" class="btn-rest" onclick="actionRest()">Rest at Camp</button>
+                <button id="btn-oxygen" class="btn-oxygen" onclick="actionOxygen()">Inhale Oxygen</button>
+            </div>
+            <div class="btn-row">
+                <button id="btn-abort" class="btn-abort" onclick="actionAbort()">Reset Climb</button>
+            </div>
+            <button id="btn-restart" style="display:none; background:#e74c3c; color:white;" onclick="resetGame()">Start New Expedition</button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="mountain-container">
+            <div class="mountain-shape"></div>
+            <div class="mountain-cap"></div>
+            
+            <div class="camp-marker summit-marker" style="bottom: 100%;">Summit (8,848m)</div>
+            <div class="camp-marker" style="bottom: 74%;">Camp 4 (7,950m)</div>
+            <div class="camp-marker" style="bottom: 55%;">Camp 3 (7,300m)</div>
+            <div class="camp-marker" style="bottom: 30%;">Camp 2 (6,400m)</div>
+            <div class="camp-marker" style="bottom: 20%;">Camp 1 (6,065m)</div>
+            <div class="camp-marker" style="bottom: 0%;">Base Camp (5,364m)</div>
+
+            <div id="climber" class="climber" style="bottom: 0%;">%NAME% 🧗‍♂️</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BASE_CAMP_ALT = 5364;
+    const SUMMIT_ALT = 8848;
+    const TOTAL_DISTANCE = SUMMIT_ALT - BASE_CAMP_ALT;
+
+    const CAMPS = [
+        { name: "Base Camp", alt: 5364 },
+        { name: "Camp 1", alt: 6065 },
+        { name: "Camp 2", alt: 6400 },
+        { name: "Camp 3", alt: 7300 },
+        { name: "Camp 4 (Death Zone)", alt: 7950 },
+        { name: "The Summit", alt: 8848 }
+    ];
+
+    const WEATHER_TYPES = ["Clear", "Windy", "Heavy Snow", "Blizzard"];
+
+    // Game variables
+    let currentAltitude = BASE_CAMP_ALT;
+    let stamina = 100;
+    let maxStamina = 100;
+    let coins = 0;
+    let oxygenTanks = 3;
+    let gearLevel = 1;
+    let hasSherpa = false;
+    let weatherIndex = 0;
+    let day = 1;
+    let isGameOver = false;
+
+    // Elements
+    const lblLocation = document.getElementById("lbl-location");
+    const lblAltitude = document.getElementById("lbl-altitude");
+    const lblStamina = document.getElementById("lbl-stamina");
+    const lblCoins = document.getElementById("lbl-coins");
+    const lblOxygen = document.getElementById("lbl-oxygen");
+    const lblWeather = document.getElementById("lbl-weather");
+    const lblDay = document.getElementById("lbl-day");
+    const lblGear = document.getElementById("lbl-gear");
+    const logBox = document.getElementById("log-box");
+    const climber = document.getElementById("climber");
+    
+    const btnClimb = document.getElementById("btn-climb");
+    const btnDescend = document.getElementById("btn-descend");
+    const btnRest = document.getElementById("btn-rest");
+    const btnOxygen = document.getElementById("btn-oxygen");
+    const btnAbort = document.getElementById("btn-abort");
+    const btnRestart = document.getElementById("btn-restart");
+
+    function isAtCamp() {
+        return CAMPS.some(camp => Math.abs(currentAltitude - camp.alt) < 5);
+    }
+
+    function updateUI() {
+        let currentCamp = "Mountain Sector";
+        for (let i = CAMPS.length - 1; i >= 0; i--) {
+            if (currentAltitude >= CAMPS[i].alt) {
+                if (Math.abs(currentAltitude - CAMPS[i].alt) < 5) {
+                    currentCamp = CAMPS[i].name;
+                }
+                break;
+            }
         }
 
-        function returnToMenu() {
-            gameContainer.style.display = 'none';
-            menuContainer.style.display = 'flex';
+        lblLocation.innerText = currentCamp;
+        lblAltitude.innerText = Math.floor(currentAltitude).toLocaleString() + "m";
+        lblStamina.innerText = Math.max(0, Math.floor(stamina)) + "/" + maxStamina + "%";
+        lblCoins.innerText = "🪙 " + coins;
+        lblOxygen.innerText = oxygenTanks;
+        lblWeather.innerText = WEATHER_TYPES[weatherIndex];
+        lblDay.innerText = day;
+        lblGear.innerText = "Lvl " + gearLevel;
+
+        let progressPercent = ((currentAltitude - BASE_CAMP_ALT) / TOTAL_DISTANCE) * 100;
+        progressPercent = Math.min(100, Math.max(0, progressPercent));
+        climber.style.bottom = progressPercent + "%";
+
+        // Rest Restriction
+        if (isAtCamp() && !isGameOver) {
+            btnRest.disabled = false;
+            btnRest.innerText = "Rest at Camp";
+            btnRest.style.background = "#e67e22";
+        } else {
+            btnRest.disabled = true;
+            btnRest.innerText = "Can't Rest (No Camp)";
+            btnRest.style.background = "#7f8c8d";
         }
-    </script>
+
+        // Descend Restriction
+        if (currentAltitude <= BASE_CAMP_ALT || isGameOver) {
+            btnDescend.disabled = true;
+        } else {
+            btnDescend.disabled = false;
+        }
+
+        if (isGameOver) {
+            btnClimb.disabled = true;
+            btnDescend.disabled = true;
+            btnRest.disabled = true;
+            btnOxygen.disabled = true;
+            btnAbort.disabled = true;
+            btnRestart.style.display = "block";
+        } else {
+            btnClimb.disabled = false;
+            btnOxygen.disabled = oxygenTanks <= 0;
+            btnAbort.disabled = false;
+            btnRestart.style.display = "none";
+        }
+    }
+
+    function addLog(text, type = "") {
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        if (type) entry.classList.add("log-" + type);
+        entry.innerText = `[Day ${day}] ${text}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function checkGameStatus() {
+        if (stamina <= 0) {
+            addLog("You collapsed out on the freezing mountain slopes. Mission failed.", "danger");
+            isGameOver = true;
+        } else if (currentAltitude >= SUMMIT_ALT) {
+            currentAltitude = SUMMIT_ALT;
+            addLog("VICTORY! You stood on the peak of Everest with " + coins + " coins!", "success");
+            isGameOver = true;
+        }
+        updateUI();
+    }
+
+    function runClimbingAnimation() {
+        climber.classList.add("climbing-animation");
+        btnClimb.disabled = true;
+        btnDescend.disabled = true;
+        btnRest.disabled = true;
+        setTimeout(() => {
+            climber.classList.remove("climbing-animation");
+            if(!isGameOver) updateUI();
+        }, 600);
+    }
+
+    function nextDayChange() {
+        day++;
+        let weatherRoll = Math.random();
+        if (currentAltitude > 7500) {
+            if (weatherRoll < 0.45) weatherIndex = 3; 
+            else if (weatherRoll < 0.75) weatherIndex = 2;
+            else weatherIndex = 1;
+        } else {
+            if (weatherRoll < 0.1) weatherIndex = 3;
+            else if (weatherRoll < 0.35) weatherIndex = 2;
+            else if (weatherRoll < 0.65) weatherIndex = 1;
+            else weatherIndex = 0;
+        }
+
+        let decay = 5; 
+        if (currentAltitude >= 7950) {
+            decay = 24; 
+            addLog("The Death Zone atmospheric density decays your system rapidly!", "danger");
+        } else if (currentAltitude >= 6400) {
+            decay = 10;
+        }
+
+        if (hasSherpa) {
+            decay = Math.floor(decay * 0.75);
+        }
+        stamina -= decay;
+    }
+
+    function triggerRandomEvent() {
+        let roll = Math.random();
+        if (currentAltitude > BASE_CAMP_ALT && roll < 0.3) {
+            let eventRoll = Math.random();
+            if (eventRoll < 0.4) {
+                addLog("Icefall slide! You lose stamina dodging debris.", "danger");
+                stamina -= 15;
+            } else if (eventRoll < 0.7) {
+                addLog("Severe winds knock you down, slowing your pace.", "warning");
+                currentAltitude = Math.max(BASE_CAMP_ALT, currentAltitude - 60);
+            } else {
+                let foundCoins = Math.floor(Math.random() * 5) + 3;
+                coins += foundCoins;
+                addLog(`You discovered lost gear left by an old expedition! Gained 🪙 ${foundCoins} coins.`, "success");
+            }
+        }
+    }
+
+    function actionClimb() {
+        if (isGameOver) return;
+
+        let baseStaminaCost = 14;
+        let baseClimbDistance = 230;
+
+        if (weatherIndex === 1) { baseStaminaCost += 5; baseClimbDistance -= 30; }
+        else if (weatherIndex === 2) { baseStaminaCost += 12; baseClimbDistance -= 70; }
+        else if (weatherIndex === 3) { baseStaminaCost += 25; baseClimbDistance -= 140; addLog("Fighting dangerous blizzard fields!", "warning"); }
+
+        stamina -= baseStaminaCost;
+        currentAltitude += baseClimbDistance;
+
+        // Snap to camps
+        for (let camp of CAMPS) {
+            if (currentAltitude > camp.alt - 100 && currentAltitude < camp.alt + 100) {
+                currentAltitude = camp.alt;
+                addLog(`Safely entered ${camp.name}!`, "success");
+                break;
+            }
+        }
+
+        // Harder coin economy: now yields only 2 to 5 coins per push
+        let coinsEarned = Math.floor(Math.random() * 4) + 2;
+        coins += coinsEarned;
+        addLog(`Ascended. Gained +${baseClimbDistance}m and found 🪙 ${coinsEarned} coins.`);
+
+        runClimbingAnimation();
+        triggerRandomEvent();
+        nextDayChange();
+        checkGameStatus();
+    }
+
+    function actionDescend() {
+        if (isGameOver || currentAltitude <= BASE_CAMP_ALT) return;
+
+        // Descending is easier on stamina
+        let baseStaminaCost = 6;
+        let baseDescendDistance = 260;
+
+        stamina -= baseStaminaCost;
+        currentAltitude = Math.max(BASE_CAMP_ALT, currentAltitude - baseDescendDistance);
+
+        // Snap to camps on descent
+        for (let i = CAMPS.length - 1; i >= 0; i--) {
+            let camp = CAMPS[i];
+            if (currentAltitude > camp.alt - 100 && currentAltitude < camp.alt + 100) {
+                currentAltitude = camp.alt;
+                addLog(`Retreated safely back down to ${camp.name}!`, "success");
+                break;
+            }
+        }
+
+        addLog(`Moving down the mountain lines. Descended -${baseDescendDistance}m.`);
+
+        runClimbingAnimation();
+        nextDayChange();
+        checkGameStatus();
+    }
+
+    function actionRest() {
+        if (isGameOver || !isAtCamp()) return;
+
+        let recovery = 35;
+        if (weatherIndex === 3) {
+            recovery = 5;
+            addLog("Blizzards strike the shelter tents. Terrible night sleep.", "warning");
+        } else if (currentAltitude >= 7950) {
+            recovery = 0;
+            addLog("The altitude extreme completely voids natural muscle healing.", "danger");
+        }
+
+        stamina = Math.min(maxStamina, stamina + recovery);
+        addLog(`Sleeping safely at camp shelter structures.`);
+
+        nextDayChange();
+        checkGameStatus();
+    }
+
+    function actionOxygen() {
+        if (isGameOver || oxygenTanks <= 0) return;
+
+        oxygenTanks--;
+        stamina = Math.min(maxStamina, stamina + 45);
+        addLog("Supplemental Oxygen mask turned on. Stamina refreshed!", "success");
+        updateUI();
+    }
+
+    // Shop Upgrade Logic
+    function buyOxygen() {
+        if (coins >= 15) {
+            coins -= 15;
+            oxygenTanks++;
+            addLog("Purchased 1 Oxygen Tank from store cargo.", "success");
+            updateUI();
+        } else {
+            addLog("Not enough coins for an Oxygen Tank!", "warning");
+        }
+    }
+
+    function buyGear() {
+        if (coins >= 30) {
+            coins -= 30;
+            gearLevel++;
+            maxStamina += 15;
+            stamina = Math.min(maxStamina, stamina + 15);
+            addLog(`Upgraded thermal gear suits to Level ${gearLevel}! Maximum stamina expanded.`, "success");
+            updateUI();
+        } else {
+            addLog("Not enough coins for gear upgrades!", "warning");
+        }
+    }
+
+    function buySherpa() {
+        if (hasSherpa) {
+            addLog("You already have a Sherpa guide with your crew!", "warning");
+            return;
+        }
+        if (coins >= 50) {
+            coins -= 50;
+            hasSherpa = true;
+            addLog("Hired a legendary Sherpa Guide! Permanent day decay drop unlocked.", "success");
+            updateUI();
+        } else {
+            addLog("Not enough coins to hire a Sherpa guide!", "warning");
+        }
+    }
+
+    function actionAbort() {
+        addLog("Aborted mission profile. Returning safely back to Base Camp fields.", "warning");
+        resetGame();
+    }
+
+    function resetGame() {
+        currentAltitude = BASE_CAMP_ALT;
+        stamina = 100;
+        maxStamina = 100;
+        coins = 0;
+        oxygenTanks = 3;
+        gearLevel = 1;
+        hasSherpa = false;
+        weatherIndex = 0;
+        day = 1;
+        isGameOver = false;
+        
+        logBox.innerHTML = '<div class="log-entry log-success">New expedition initialized. Tread lightly, and use your descent options wisely!</div>';
+        updateUI();
+    }
+
+    updateUI();
+</script>
+
 </body>
 </html>
