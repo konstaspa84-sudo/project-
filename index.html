@@ -3,16 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Everest RPG Expedition</title>
+    <title>Everest RPG Ultra Expansion</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: #1a252f;
             color: #ecf0f1;
             display: flex;
@@ -21,274 +16,182 @@
             min-height: 100vh;
             padding: 20px;
         }
-
         .game-wrapper {
             display: flex;
-            flex-direction: row;
             background: #2c3e50;
             border-radius: 12px;
             padding: 25px;
             width: 100%;
-            max-width: 950px;
+            max-width: 1100px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             gap: 25px;
         }
-
-        .left-panel {
-            flex: 1.3;
+        .left-panel { flex: 1.4; display: flex; flex-direction: column; }
+        .right-panel { flex: 0.6; background: #22313f; border-radius: 8px; padding: 20px; position: relative; min-height: 550px; }
+        
+        h1 { color: #3498db; font-size: 1.8rem; margin-bottom: 5px; }
+        h3 { font-size: 1rem; color: #f1c40f; margin-bottom: 10px; }
+        
+        /* Setup / Class Screen */
+        #class-selection {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            gap: 15px;
+            width: 100%;
         }
-
-        .right-panel {
-            flex: 0.7;
-            background: #22313f;
+        .class-card {
+            background: #34495e;
+            padding: 15px;
             border-radius: 8px;
-            padding: 20px;
-            position: relative;
-            min-height: 500px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
         }
+        .class-card:hover { border-color: #3498db; }
+        .class-card.selected { border-color: #2ecc71; background: #243342; }
 
-        h1 {
-            margin-bottom: 10px;
-            color: #3498db;
-            font-size: 1.8rem;
-        }
-
+        /* HUD layout */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-bottom: 15px;
             background: #34495e;
             padding: 12px;
             border-radius: 8px;
         }
+        .stat-item { font-size: 0.85rem; }
+        .stat-value { font-weight: bold; color: #f1c40f; }
 
-        .stat-item {
-            font-size: 0.95rem;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #f1c40f;
-        }
-
-        .shop-box {
-            background: #2c3e50;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
-        }
-
-        .shop-title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .btn-shop {
-            background: #16a085;
-            color: white;
-            font-size: 0.8rem;
-            padding: 6px;
-        }
+        .dashboard-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .shop-box, .inventory-box { flex: 1; background: #22313f; border: 1px solid #34495e; border-radius: 8px; padding: 12px; }
+        .section-title { font-size: 0.85rem; font-weight: bold; color: #3498db; margin-bottom: 8px; text-transform: uppercase; }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
+        .btn-shop { background: #16a085; color: white; font-size: 0.75rem; padding: 6px; text-align: left; }
         .btn-shop:hover { background: #1abc9c; }
+        
+        .inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .inv-slot { background: #1a252f; border: 1px dashed #7f8c8d; border-radius: 4px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; position: relative; cursor: pointer; }
+        .inv-slot:hover::after { content: attr(data-tip); position: absolute; bottom: 50px; background: #000; color: #fff; font-size: 0.7rem; padding: 3px; border-radius: 3px; white-space: nowrap; z-index: 99; }
 
-        .log-box {
-            background: #1a252f;
-            border: 1px solid #7f8c8d;
-            border-radius: 6px;
-            height: 120px;
-            overflow-y: auto;
-            padding: 10px;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            color: #bdc3c7;
-        }
-
-        .log-entry {
-            margin-bottom: 6px;
-            border-left: 3px solid #3498db;
-            padding-left: 6px;
-        }
+        .log-box { background: #1a252f; border: 1px solid #7f8c8d; border-radius: 6px; height: 110px; overflow-y: auto; padding: 10px; font-size: 0.8rem; margin-bottom: 15px; color: #bdc3c7; }
+        .log-entry { margin-bottom: 4px; border-left: 3px solid #3498db; padding-left: 6px; }
         .log-danger { border-left-color: #e74c3c; color: #e74c3c; }
         .log-success { border-left-color: #2ecc71; color: #2ecc71; }
         .log-warning { border-left-color: #f1c40f; color: #f1c40f; }
 
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .achievements-box { background: #34495e; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.75rem; }
+        .ach-list { display: flex; gap: 10px; flex-wrap: wrap; }
+        .ach-badge { background: #7f8c8d; color: #2c3e50; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .ach-badge.unlocked { background: #f1c40f; color: #2c3e50; }
 
-        .btn-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            flex: 1;
-            padding: 12px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .btn-row { display: flex; gap: 8px; }
+        button { flex: 1; padding: 10px; font-size: 0.9rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
         .btn-climb { background: #2ecc71; color: white; }
-        .btn-climb:hover { background: #27ae60; }
         .btn-descend { background: #3498db; color: white; }
-        .btn-descend:hover { background: #2980b9; }
+        .btn-scavenge { background: #9b59b6; color: white; }
         .btn-rest { background: #e67e22; color: white; }
-        .btn-rest:hover { background: #d35400; }
-        .btn-oxygen { background: #9b59b6; color: white; }
-        .btn-oxygen:hover { background: #8e44ad; }
-        .btn-abort { background: #7f8c8d; color: white; }
-        .btn-abort:hover { background: #95a5a6; }
+        .btn-abort { background: #95a5a6; color: white; }
 
-        button:disabled {
-            background: #7f8c8d !important;
-            color: #bdc3c7 !important;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
+        button:disabled { background: #555 !important; color: #888 !important; cursor: not-allowed; opacity: 0.5; }
 
-        .mountain-container {
-            position: relative;
-            width: 100%;
-            height: 460px;
-        }
+        /* Mountain */
+        .mountain-container { position: relative; width: 100%; height: 510px; }
+        .mountain-shape { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 110px solid transparent; border-right: 110px solid transparent; border-bottom: 490px solid #7f8c8d; }
+        .mountain-cap { position: absolute; bottom: 343px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 33px solid transparent; border-right: 33px solid transparent; border-bottom: 147px solid #ecf0f1; pointer-events: none; }
+        .camp-marker { position: absolute; left: 55%; font-size: 0.7rem; color: #bdc3c7; border-bottom: 1px dashed rgba(255,255,255,0.3); width: 110px; padding-bottom: 2px; }
+        .camp-marker::before { content: '⛺'; position: absolute; left: -20px; }
+        .summit-marker::before { content: '🚩'; }
+        .climber { position: absolute; left: 45%; font-size: 1.5rem; z-index: 10; transition: bottom 0.5s ease-out; transform: translate(-50%, 50%); }
 
-        .mountain-shape {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 110px solid transparent;
-            border-right: 110px solid transparent;
-            border-bottom: 440px solid #7f8c8d;
-        }
-
-        .mountain-cap {
-            position: absolute;
-            bottom: 308px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 33px solid transparent;
-            border-right: 33px solid transparent;
-            border-bottom: 132px solid #ecf0f1;
-            pointer-events: none;
-        }
-
-        .camp-marker {
-            position: absolute;
-            left: 55%;
-            font-size: 0.75rem;
-            color: #bdc3c7;
-            border-bottom: 1px dashed rgba(255,255,255,0.3);
-            width: 110px;
-            padding-bottom: 2px;
-        }
-        .camp-marker::before {
-            content: '⛺';
-            position: absolute;
-            left: -22px;
-            font-size: 0.85rem;
-        }
-        .summit-marker::before {
-            content: '🚩';
-        }
-
-        .climber {
-            position: absolute;
-            left: 45%;
-            font-size: 1.6rem;
-            z-index: 10;
-            transition: bottom 0.5s ease-out;
-            transform: translate(-50%, 50%);
-        }
-
-        .climbing-animation {
-            animation: bounce 0.3s ease infinite alternate;
-        }
-
-        @keyframes bounce {
-            0% { transform: translate(-50%, 50%) translateY(0); }
-            100% { transform: translate(-50%, 50%) translateY(-10px); }
-        }
-
-        @media (max-width: 768px) {
-            .game-wrapper { flex-direction: column; }
-            .right-panel { min-height: 480px; }
-        }
+        .climbing-animation { animation: bounce 0.3s ease infinite alternate; }
+        @keyframes bounce { 0% { transform: translate(-50%, 50%) translateY(0); } 100% { transform: translate(-50%, 50%) translateY(-10px); } }
+        @media (max-width: 768px) { .game-wrapper { flex-direction: column; } }
     </style>
 </head>
 <body>
 
 <div class="game-wrapper">
-    <div class="left-panel">
+    <div class="left-panel" id="main-interface" style="display:none;">
         <div>
             <h1>Everest Expedition</h1>
+            <h3 id="lbl-class-title">Class: Loading...</h3>
             
             <div class="stats-grid">
                 <div class="stat-item">Location: <span id="lbl-location" class="stat-value">Base Camp</span></div>
                 <div class="stat-item">Altitude: <span id="lbl-altitude" class="stat-value">5,364m</span></div>
                 <div class="stat-item">Stamina: <span id="lbl-stamina" class="stat-value">100%</span></div>
-                <div class="stat-item">Coins: <span id="lbl-coins" class="stat-value" style="color: #f1c40f;">🪙 0</span></div>
-                <div class="stat-item">O2 Tanks: <span id="lbl-oxygen" class="stat-value">3</span></div>
+                <div class="stat-item">Coins: <span id="lbl-coins" class="stat-value">🪙 0</span></div>
+                <div class="stat-item">Oxygen System: <span id="lbl-oxygen" class="stat-value">100%</span></div>
                 <div class="stat-item">Weather: <span id="lbl-weather" class="stat-value">Clear</span></div>
                 <div class="stat-item">Day: <span id="lbl-day" class="stat-value">1</span></div>
                 <div class="stat-item">Gear Tier: <span id="lbl-gear" class="stat-value">Lvl 1</span></div>
+                <div class="stat-item">O2 Efficiency: <span id="lbl-drain" class="stat-value">1.0x</span></div>
             </div>
 
-            <div class="shop-box">
-                <div class="shop-title">Base Camp Market</div>
-                <div class="shop-grid">
-                    <button class="btn-shop" id="btn-buy-o2" onclick="buyOxygen()">+1 Oxygen (15 🪙)</button>
-                    <button class="btn-shop" id="btn-buy-gear" onclick="buyGear()">Upgrade Clothes (30 🪙)</button>
-                    <button class="btn-shop" id="btn-buy-sherpa" onclick="buySherpa()">Hire Sherpa Guide (50 🪙)</button>
-                    <div style="font-size: 0.72rem; color: #bdc3c7; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px;">
-                        Sherpas reduce daily stamina drain by 25%!
+            <div class="dashboard-row">
+                <div class="shop-box">
+                    <div class="section-title">Camp Supplier</div>
+                    <div class="shop-grid">
+                        <button class="btn-shop" id="btn-buy-refill" onclick="buyO2Refill()">Refill Oxygen Tanks (Cost Varies)</button>
+                        <button class="btn-shop" onclick="buyGear()">Upgrade Technical Apparel (35 🪙)</button>
+                        <button class="btn-shop" id="btn-buy-sherpa" onclick="buySherpa()">Retain Sherpa Porter (60 🪙)</button>
                     </div>
+                </div>
+
+                <div class="inventory-box">
+                    <div class="section-title">Backpack Storage (<span id="bag-count">0</span>/8 Slots)</div>
+                    <div class="inv-grid" id="inventory-slots"></div>
+                    <div style="font-size: 0.68rem; color: #a0a0a0; margin-top: 4px; text-align: center;">Click an item inside your pack to consume it!</div>
                 </div>
             </div>
 
-            <div id="log-box" class="log-box">
-                <div class="log-entry log-success">Expedition launched! Coins are scarcer now. Climb to earn, or Descend to safety if stamina runs thin!</div>
+            <div class="achievements-box">
+                <div class="section-title" style="color: #f1c40f;">Expedition Achievements</div>
+                <div class="ach-list">
+                    <span class="ach-badge" id="ach-0">Bare Minimum</span>
+                    <span class="ach-badge" id="ach-1">Normal Mountaineer</span>
+                    <span class="ach-badge" id="ach-2">Rich Mountaineer</span>
+                    <span class="ach-badge" id="ach-3">Storm Chaser</span>
+                </div>
             </div>
+
+            <div id="log-box" class="log-box"></div>
         </div>
 
         <div class="btn-group">
             <div class="btn-row">
                 <button id="btn-climb" class="btn-climb" onclick="actionClimb()">Push Upward</button>
                 <button id="btn-descend" class="btn-descend" onclick="actionDescend()">Descend</button>
+                <button id="btn-scavenge" class="btn-scavenge" onclick="actionScavenge()">Scavenge Area</button>
             </div>
             <div class="btn-row">
                 <button id="btn-rest" class="btn-rest" onclick="actionRest()">Rest at Camp</button>
-                <button id="btn-oxygen" class="btn-oxygen" onclick="actionOxygen()">Inhale Oxygen</button>
+                <button id="btn-abort" class="btn-abort" onclick="actionAbort()">Reset Expedition</button>
             </div>
-            <div class="btn-row">
-                <button id="btn-abort" class="btn-abort" onclick="actionAbort()">Reset Climb</button>
+            <button id="btn-restart" style="display:none; background:#e74c3c; color:white;" onclick="resetToMenu()">Return to Setup Screen</button>
+        </div>
+    </div>
+
+    <div class="left-panel" id="menu-interface">
+        <h1>Select Your Mountaineer Profile</h1>
+        <h3 style="color:#bdc3c7; margin-bottom: 20px;">Your tier alters starting gear, maximum oxygen capacities, and fuel replenishment dynamics:</h3>
+        
+        <div id="class-selection">
+            <div class="class-card" onclick="selectClass(0)">
+                <h2 style="color:#e74c3c;">1. The Bare Minimum</h2>
+                <p style="font-size: 0.85rem; margin-top: 5px; color:#bdc3c7;">Starts with 🪙 0. Max oxygen tank capacity is strictly capped at **70%**. Basic gear structures mean you take heavy background damage, but camp oxygen refilling costs only 10 coins.</p>
             </div>
-            <button id="btn-restart" style="display:none; background:#e74c3c; color:white;" onclick="resetGame()">Start New Expedition</button>
+            <div class="class-card" onclick="selectClass(1)">
+                <h2 style="color:#3498db;">2. Normal Mountaineer</h2>
+                <p style="font-size: 0.85rem; margin-top: 5px; color:#bdc3c7;">Starts with 🪙 20. Max oxygen capacity extends up to standard **100%**. Balancing average asset scales, camp refills cost 25 coins.</p>
+            </div>
+            <div class="class-card" onclick="selectClass(2)">
+                <h2 style="color:#2ecc71;">3. Rich Mountaineer</h2>
+                <p style="font-size: 0.85rem; margin-top: 5px; color:#bdc3c7;">Starts with 🪙 100 deep pockets. Heavy heavy equipment profiles grant an expanded **150%** max oxygen capacity load. High priority luxury camp refills cost 50 coins.</p>
+            </div>
         </div>
     </div>
 
@@ -304,7 +207,7 @@
             <div class="camp-marker" style="bottom: 20%;">Camp 1 (6,065m)</div>
             <div class="camp-marker" style="bottom: 0%;">Base Camp (5,364m)</div>
 
-            <div id="climber" class="climber" style="bottom: 0%;">%NAME% 🧗‍♂️</div>
+            <div id="climber" class="climber" style="bottom: 0%;">🧗‍♂️</div>
         </div>
     </div>
 </div>
@@ -325,19 +228,26 @@
 
     const WEATHER_TYPES = ["Clear", "Windy", "Heavy Snow", "Blizzard"];
 
-    // Game variables
+    // State Core Configuration variables
     let currentAltitude = BASE_CAMP_ALT;
     let stamina = 100;
     let maxStamina = 100;
     let coins = 0;
-    let oxygenTanks = 3;
+    let oxygen = 100;
+    let maxOxygen = 100;
+    let o2RefillCost = 25;
     let gearLevel = 1;
     let hasSherpa = false;
     let weatherIndex = 0;
     let day = 1;
     let isGameOver = false;
+    let selectedProfile = 1; 
+    let inventory = [];
+    let achievements = [false, false, false, false]; // [BareMin, Normal, Rich, StormChaser]
 
-    // Elements
+    // UI Hook Points
+    const mainInterface = document.getElementById("main-interface");
+    const menuInterface = document.getElementById("menu-interface");
     const lblLocation = document.getElementById("lbl-location");
     const lblAltitude = document.getElementById("lbl-altitude");
     const lblStamina = document.getElementById("lbl-stamina");
@@ -346,15 +256,46 @@
     const lblWeather = document.getElementById("lbl-weather");
     const lblDay = document.getElementById("lbl-day");
     const lblGear = document.getElementById("lbl-gear");
+    const lblDrain = document.getElementById("lbl-drain");
     const logBox = document.getElementById("log-box");
     const climber = document.getElementById("climber");
     
     const btnClimb = document.getElementById("btn-climb");
     const btnDescend = document.getElementById("btn-descend");
+    const btnScavenge = document.getElementById("btn-scavenge");
     const btnRest = document.getElementById("btn-rest");
-    const btnOxygen = document.getElementById("btn-oxygen");
     const btnAbort = document.getElementById("btn-abort");
     const btnRestart = document.getElementById("btn-restart");
+    const btnBuyRefill = document.getElementById("btn-buy-refill");
+
+    function selectClass(classIndex) {
+        selectedProfile = classIndex;
+        menuInterface.style.display = "none";
+        mainInterface.style.display = "flex";
+        
+        // Configuration application based on choices
+        if (classIndex === 0) {
+            document.getElementById("lbl-class-title").innerText = "Tier: Bare Minimum";
+            coins = 0;
+            maxOxygen = 70;
+            oxygen = 70;
+            o2RefillCost = 10;
+        } else if (classIndex === 1) {
+            document.getElementById("lbl-class-title").innerText = "Tier: Normal Mountaineer";
+            coins = 20;
+            maxOxygen = 100;
+            oxygen = 100;
+            o2RefillCost = 25;
+        } else if (classIndex === 2) {
+            document.getElementById("lbl-class-title").innerText = "Tier: Rich Mountaineer";
+            coins = 100;
+            maxOxygen = 150;
+            oxygen = 150;
+            o2RefillCost = 50;
+        }
+        
+        resetGameEngineLayout();
+    }
 
     function isAtCamp() {
         return CAMPS.some(camp => Math.abs(currentAltitude - camp.alt) < 5);
@@ -375,45 +316,68 @@
         lblAltitude.innerText = Math.floor(currentAltitude).toLocaleString() + "m";
         lblStamina.innerText = Math.max(0, Math.floor(stamina)) + "/" + maxStamina + "%";
         lblCoins.innerText = "🪙 " + coins;
-        lblOxygen.innerText = oxygenTanks;
+        lblOxygen.innerText = Math.max(0, Math.floor(oxygen)) + "/" + maxOxygen + "%";
         lblWeather.innerText = WEATHER_TYPES[weatherIndex];
         lblDay.innerText = day;
         lblGear.innerText = "Lvl " + gearLevel;
+
+        // Dynamic extra stamina calculation based on lowering oxygen density metrics
+        let penaltyMultiplier = 1.0;
+        if (oxygen < 25) penaltyMultiplier = 2.2;
+        else if (oxygen < 50) penaltyMultiplier = 1.6;
+        else if (oxygen < 75) penaltyMultiplier = 1.2;
+        lblDrain.innerText = penaltyMultiplier + "x";
 
         let progressPercent = ((currentAltitude - BASE_CAMP_ALT) / TOTAL_DISTANCE) * 100;
         progressPercent = Math.min(100, Math.max(0, progressPercent));
         climber.style.bottom = progressPercent + "%";
 
-        // Rest Restriction
-        if (isAtCamp() && !isGameOver) {
-            btnRest.disabled = false;
-            btnRest.innerText = "Rest at Camp";
-            btnRest.style.background = "#e67e22";
-        } else {
-            btnRest.disabled = true;
-            btnRest.innerText = "Can't Rest (No Camp)";
-            btnRest.style.background = "#7f8c8d";
+        // Render backpack configuration interface
+        const invSlots = document.getElementById("inventory-slots");
+        invSlots.innerHTML = "";
+        for (let i = 0; i < 8; i++) {
+            const slot = document.createElement("div");
+            slot.className = "inv-slot";
+            if (inventory[i]) {
+                slot.innerText = inventory[i].icon;
+                slot.setAttribute("data-tip", `${inventory[i].name} (Click to Use)`);
+                slot.onclick = () => useInventoryItem(i);
+            } else {
+                slot.innerText = "";
+                slot.setAttribute("data-tip", "Empty Slot");
+            }
+            invSlots.appendChild(slot);
         }
+        document.getElementById("bag-count").innerText = inventory.length;
 
-        // Descend Restriction
-        if (currentAltitude <= BASE_CAMP_ALT || isGameOver) {
-            btnDescend.disabled = true;
-        } else {
-            btnDescend.disabled = false;
-        }
+        // Interactive Button Locking Matrixes
+        btnRest.disabled = !isAtCamp() || isGameOver;
+        btnRest.innerText = isAtCamp() ? "Rest at Camp" : "Can't Rest (No Camp)";
+        btnRest.style.background = isAtCamp() ? "#e67e22" : "#7f8c8d";
+        
+        btnDescend.disabled = (currentAltitude <= BASE_CAMP_ALT || isGameOver);
+        btnScavenge.disabled = (isAtCamp() || isGameOver);
+        btnBuyRefill.innerText = `Refill Oxygen Tanks (${o2RefillCost} 🪙)`;
+        btnBuyRefill.disabled = !isAtCamp() || coins < o2RefillCost;
 
         if (isGameOver) {
             btnClimb.disabled = true;
             btnDescend.disabled = true;
+            btnScavenge.disabled = true;
             btnRest.disabled = true;
-            btnOxygen.disabled = true;
             btnAbort.disabled = true;
             btnRestart.style.display = "block";
         } else {
             btnClimb.disabled = false;
-            btnOxygen.disabled = oxygenTanks <= 0;
             btnAbort.disabled = false;
             btnRestart.style.display = "none";
+        }
+
+        // Apply visual updates to structural trophy shields elements
+        for (let idx = 0; idx < 4; idx++) {
+            let element = document.getElementById("ach-" + idx);
+            if (achievements[idx]) element.classList.add("unlocked");
+            else element.classList.remove("unlocked");
         }
     }
 
@@ -426,13 +390,38 @@
         logBox.scrollTop = logBox.scrollHeight;
     }
 
+    function useInventoryItem(index) {
+        if (isGameOver) return;
+        const item = inventory[index];
+        if (item.type === "food") {
+            stamina = Math.min(maxStamina, stamina + 35);
+            addLog(`Consumed ${item.name}. Restored 35% stamina.`, "success");
+        } else if (item.type === "heat") {
+            stamina = Math.min(maxStamina, stamina + 15);
+            oxygen = Math.min(maxOxygen, oxygen + 20);
+            addLog(`Activated ${item.name}. Internal thermal metrics stabilization optimized.`, "success");
+        }
+        inventory.splice(index, 1);
+        updateUI();
+    }
+
     function checkGameStatus() {
         if (stamina <= 0) {
-            addLog("You collapsed out on the freezing mountain slopes. Mission failed.", "danger");
+            addLog("You passed out from oxygen deprivation and hypothermia. The mountain claims another soul.", "danger");
             isGameOver = true;
         } else if (currentAltitude >= SUMMIT_ALT) {
             currentAltitude = SUMMIT_ALT;
-            addLog("VICTORY! You stood on the peak of Everest with " + coins + " coins!", "success");
+            
+            // Large coin payout upon reaching the summit!
+            let summitPayout = 100;
+            coins += summitPayout;
+            addLog(`VICTORY! You stood on the roof of the world! Earned an expedition bonus of 🪙 ${summitPayout} coins!`, "success");
+            
+            // Check Achievements conditions
+            if (selectedProfile === 0) achievements[0] = true;
+            if (selectedProfile === 1) achievements[1] = true;
+            if (selectedProfile === 2) achievements[2] = true;
+            
             isGameOver = true;
         }
         updateUI();
@@ -442,6 +431,7 @@
         climber.classList.add("climbing-animation");
         btnClimb.disabled = true;
         btnDescend.disabled = true;
+        btnScavenge.disabled = true;
         btnRest.disabled = true;
         setTimeout(() => {
             climber.classList.remove("climbing-animation");
@@ -463,35 +453,33 @@
             else weatherIndex = 0;
         }
 
-        let decay = 5; 
-        if (currentAltitude >= 7950) {
-            decay = 24; 
-            addLog("The Death Zone atmospheric density decays your system rapidly!", "danger");
-        } else if (currentAltitude >= 6400) {
-            decay = 10;
+        if (weatherIndex === 3 && !isGameOver) {
+            achievements[3] = true; // Achievement unlocked for surviving a blizzard day
         }
 
-        if (hasSherpa) {
-            decay = Math.floor(decay * 0.75);
-        }
-        stamina -= decay;
-    }
+        // Oxygen levels depletion tracking matrix
+        let oxygenLoss = 8;
+        if (currentAltitude >= 7950) oxygenLoss = 18; 
+        else if (currentAltitude >= 6400) oxygenLoss = 12;
+        oxygen = Math.max(0, oxygen - oxygenLoss);
 
-    function triggerRandomEvent() {
-        let roll = Math.random();
-        if (currentAltitude > BASE_CAMP_ALT && roll < 0.3) {
-            let eventRoll = Math.random();
-            if (eventRoll < 0.4) {
-                addLog("Icefall slide! You lose stamina dodging debris.", "danger");
-                stamina -= 15;
-            } else if (eventRoll < 0.7) {
-                addLog("Severe winds knock you down, slowing your pace.", "warning");
-                currentAltitude = Math.max(BASE_CAMP_ALT, currentAltitude - 60);
-            } else {
-                let foundCoins = Math.floor(Math.random() * 5) + 3;
-                coins += foundCoins;
-                addLog(`You discovered lost gear left by an old expedition! Gained 🪙 ${foundCoins} coins.`, "success");
-            }
+        // Core dynamic multipliers engine application
+        let efficiencyMultiplier = 1.0;
+        if (oxygen < 25) efficiencyMultiplier = 2.2;
+        else if (oxygen < 50) efficiencyMultiplier = 1.6;
+        else if (oxygen < 75) efficiencyMultiplier = 1.2;
+
+        let baseDecayValue = 5; 
+        if (currentAltitude >= 7950) baseDecayValue = 22; 
+        else if (currentAltitude >= 6400) baseDecayValue = 10;
+
+        let calculatedStaminaLoss = Math.floor(baseDecayValue * efficiencyMultiplier);
+        if (hasSherpa) calculatedStaminaLoss = Math.floor(calculatedStaminaLoss * 0.75);
+        
+        stamina -= calculatedStaminaLoss;
+        if (oxygen <= 0) {
+            stamina -= 15;
+            addLog("Suffocating completely without supplementary oxygen support tanks!", "danger");
         }
     }
 
@@ -503,27 +491,26 @@
 
         if (weatherIndex === 1) { baseStaminaCost += 5; baseClimbDistance -= 30; }
         else if (weatherIndex === 2) { baseStaminaCost += 12; baseClimbDistance -= 70; }
-        else if (weatherIndex === 3) { baseStaminaCost += 25; baseClimbDistance -= 140; addLog("Fighting dangerous blizzard fields!", "warning"); }
+        else if (weatherIndex === 3) { baseStaminaCost += 26; baseClimbDistance -= 140; addLog("Fighting dangerous blizzard fields!", "warning"); }
 
         stamina -= baseStaminaCost;
         currentAltitude += baseClimbDistance;
 
-        // Snap to camps
+        // Target Camp calculations snapping module
         for (let camp of CAMPS) {
             if (currentAltitude > camp.alt - 100 && currentAltitude < camp.alt + 100) {
                 currentAltitude = camp.alt;
-                addLog(`Safely entered ${camp.name}!`, "success");
+                addLog(`Safely entered tactical boundaries of ${camp.name}!`, "success");
                 break;
             }
         }
 
-        // Harder coin economy: now yields only 2 to 5 coins per push
+        // Hard economy reward payout limits
         let coinsEarned = Math.floor(Math.random() * 4) + 2;
         coins += coinsEarned;
         addLog(`Ascended. Gained +${baseClimbDistance}m and found 🪙 ${coinsEarned} coins.`);
 
         runClimbingAnimation();
-        triggerRandomEvent();
         nextDayChange();
         checkGameStatus();
     }
@@ -531,19 +518,17 @@
     function actionDescend() {
         if (isGameOver || currentAltitude <= BASE_CAMP_ALT) return;
 
-        // Descending is easier on stamina
         let baseStaminaCost = 6;
         let baseDescendDistance = 260;
 
         stamina -= baseStaminaCost;
         currentAltitude = Math.max(BASE_CAMP_ALT, currentAltitude - baseDescendDistance);
 
-        // Snap to camps on descent
         for (let i = CAMPS.length - 1; i >= 0; i--) {
             let camp = CAMPS[i];
             if (currentAltitude > camp.alt - 100 && currentAltitude < camp.alt + 100) {
                 currentAltitude = camp.alt;
-                addLog(`Retreated safely back down to ${camp.name}!`, "success");
+                addLog(`Retreated safely back down to operations center at ${camp.name}!`, "success");
                 break;
             }
         }
@@ -551,6 +536,36 @@
         addLog(`Moving down the mountain lines. Descended -${baseDescendDistance}m.`);
 
         runClimbingAnimation();
+        nextDayChange();
+        checkGameStatus();
+    }
+
+    function actionScavenge() {
+        if (isGameOver || isAtCamp()) return;
+        if (inventory.length >= 8) {
+            addLog("Your pack handles are overloaded! Clear slots before scavenging.", "warning");
+            return;
+        }
+
+        stamina -= 12; 
+        let eventRoll = Math.random();
+        
+        if (eventRoll < 0.35) {
+            let itemsPool = [
+                { name: "Frozen Ration Pack", icon: "🍱", type: "food" },
+                { name: "Emergency Chemical Heat Pack", icon: "🔥", type: "heat" }
+            ];
+            let picked = itemsPool[Math.floor(Math.random() * itemsPool.length)];
+            inventory.push(picked);
+            addLog(`Scavenged item debris fields: Salvaged a [${picked.name}]!`, "success");
+        } else if (eventRoll < 0.70) {
+            let extraGold = Math.floor(Math.random() * 6) + 4;
+            coins += extraGold;
+            addLog(`Discovered lost metal containers holding 🪙 ${extraGold} ancient coins!`, "success");
+        } else {
+            addLog("Scavenged sector wreckage thoroughly but found nothing useful.", "warning");
+        }
+
         nextDayChange();
         checkGameStatus();
     }
@@ -568,83 +583,73 @@
         }
 
         stamina = Math.min(maxStamina, stamina + recovery);
-        addLog(`Sleeping safely at camp shelter structures.`);
+        addLog(`Sleeping safely inside camp shelter structures.`);
 
         nextDayChange();
         checkGameStatus();
     }
 
-    function actionOxygen() {
-        if (isGameOver || oxygenTanks <= 0) return;
-
-        oxygenTanks--;
-        stamina = Math.min(maxStamina, stamina + 45);
-        addLog("Supplemental Oxygen mask turned on. Stamina refreshed!", "success");
+    function buyO2Refill() {
+        if (!isAtCamp() || coins < o2RefillCost) return;
+        coins -= o2RefillCost;
+        oxygen = maxOxygen;
+        addLog(`Oxygen reserve systems fully replenished to max level (${maxOxygen}%).`, "success");
         updateUI();
     }
 
-    // Shop Upgrade Logic
-    function buyOxygen() {
-        if (coins >= 15) {
-            coins -= 15;
-            oxygenTanks++;
-            addLog("Purchased 1 Oxygen Tank from store cargo.", "success");
-            updateUI();
-        } else {
-            addLog("Not enough coins for an Oxygen Tank!", "warning");
-        }
-    }
-
     function buyGear() {
-        if (coins >= 30) {
-            coins -= 30;
+        if (coins >= 35) {
+            coins -= 35;
             gearLevel++;
             maxStamina += 15;
             stamina = Math.min(maxStamina, stamina + 15);
-            addLog(`Upgraded thermal gear suits to Level ${gearLevel}! Maximum stamina expanded.`, "success");
+            addLog(`Upgraded gear insulation parameters to Level ${gearLevel}! Max Stamina increased.`, "success");
             updateUI();
         } else {
-            addLog("Not enough coins for gear upgrades!", "warning");
+            addLog("Insufficient coins to complete transactional update.", "warning");
         }
     }
 
     function buySherpa() {
         if (hasSherpa) {
-            addLog("You already have a Sherpa guide with your crew!", "warning");
+            addLog("A personal guide is already accompanying your crew.", "warning");
             return;
         }
-        if (coins >= 50) {
-            coins -= 50;
+        if (coins >= 60) {
+            coins -= 60;
             hasSherpa = true;
-            addLog("Hired a legendary Sherpa Guide! Permanent day decay drop unlocked.", "success");
+            addLog("Retained legendary local guide! Environment scaling system penalties reduced 25%.", "success");
             updateUI();
         } else {
-            addLog("Not enough coins to hire a Sherpa guide!", "warning");
+            addLog("Insufficient coin balance for logistics retention.", "warning");
         }
     }
 
     function actionAbort() {
-        addLog("Aborted mission profile. Returning safely back to Base Camp fields.", "warning");
-        resetGame();
+        addLog("Aborted current expedition track. Resetting profile matrix.", "warning");
+        resetToMenu();
     }
 
-    function resetGame() {
+    function resetToMenu() {
+        mainInterface.style.display = "none";
+        menuInterface.style.display = "flex";
+        isGameOver = false;
+    }
+
+    function resetGameEngineLayout() {
         currentAltitude = BASE_CAMP_ALT;
         stamina = 100;
         maxStamina = 100;
-        coins = 0;
-        oxygenTanks = 3;
-        gearLevel = 1;
         hasSherpa = false;
+        gearLevel = 1;
         weatherIndex = 0;
         day = 1;
+        inventory = [];
         isGameOver = false;
         
-        logBox.innerHTML = '<div class="log-entry log-success">New expedition initialized. Tread lightly, and use your descent options wisely!</div>';
+        logBox.innerHTML = '<div class="log-entry log-success">Expedition initialized. Choose your target paths carefully. Good luck out there.</div>';
         updateUI();
     }
-
-    updateUI();
 </script>
 
 </body>
