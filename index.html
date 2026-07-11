@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Document Data</title>
+    <style>
+        /* Ultra simple style to avoid suspicion */
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        /* The hidden trigger */
+        #void-text {
+            cursor: pointer;
+            color: #dcdcdc;
+            user-select: none;
+        }
+
+        /* Login elements */
+        #login-container {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        input {
+            padding: 5px;
+            font-family: monospace;
+            border: 1px solid #ccc;
+            background: #fff;
+            width: 150px;
+        }
+        
+        button {
+            padding: 5px;
+            font-family: monospace;
+            border: 1px solid #ccc;
+            background: #eee;
+            cursor: pointer;
+        }
+
+        /* Game Hub Menu */
+        #menu-container {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+
+        /* Game Container */
+        #game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            background-color: #111;
+            border: 2px solid #333;
+            max-width: 90vw;
+            max-height: 50vh;
+        }
+        
+        /* Phone Touch Controls */
+        .controls {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 50px);
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .ctrl-btn {
+            border: 1px solid #ccc;
+            background: #eee;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .brk-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .brk-btn {
+            width: 80px;
+            height: 50px;
+            border: 1px solid #ccc;
+            background: #eee;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="void-text">void</div>
+
+    <div id="login-container">
+        <input type="text" id="user" placeholder="username" autocomplete="off">
+        <input type="password" id="pass" placeholder="password">
+        <button onclick="checkLogin()">enter</button>
+    </div>
+
+    <div id="menu-container">
+        <div>select game:</div>
+        <button onclick="startSnake()">1. snake</button>
+        <button onclick="startBricks()">2. bricks</button>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="touch-controls"></div>
+    </div>
+
+    <script>
+        const voidText = document.getElementById('void-text');
+        const loginContainer = document.getElementById('login-container');
+        const menuContainer = document.getElementById('menu-container');
+        const gameContainer = document.getElementById('game-container');
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const touchControls = document.getElementById('touch-controls');
+
+        let currentGameInterval = null;
+
+        // Reveal login when void is clicked
+        voidText.addEventListener('click', () => {
+            voidText.style.display = 'none';
+            loginContainer.style.display = 'flex';
+            document.getElementById('user').focus();
+        });
+
+        document.getElementById('pass').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkLogin();
+        });
+
+        function checkLogin() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+
+            if (user === 'konstas0002' && pass === 'loveyoulove') {
+                loginContainer.style.display = 'none';
+                menuContainer.style.display = 'flex';
+            } else {
+                document.getElementById('user').value = '';
+                document.getElementById('pass').value = '';
+                loginContainer.style.display = 'none';
+                voidText.style.display = 'block';
+            }
+        }
+
+        function clearCurrentGame() {
+            if (currentGameInterval) clearInterval(currentGameInterval);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            touchControls.innerHTML = '';
+        }
+
+        // --- GAME 1: SNAKE ---
+        function startSnake() {
+            menuContainer.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            clearCurrentGame();
+
+            // Mobile layout for snake
+            touchControls.innerHTML = `
+                <div class="controls">
+                    <div></div><div class="ctrl-btn" id="btn-up">U</div><div></div>
+                    <div class="ctrl-btn" id="btn-left">L</div><div class="ctrl-btn" id="btn-down">D</div><div class="ctrl-btn" id="btn-right">R</div>
+                </div>
+            `;
+
+            const box = 20;
+            let snake = [{ x: 10 * box, y: 10 * box }];
+            let food = {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+            let d = "";
+            let score = 0;
+
+            // Keyboard input
+            document.addEventListener("keydown", handleKey);
+            function handleKey(e) {
+                if([37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
+                if (e.keyCode == 37 && d != "RIGHT") d = "LEFT";
+                else if (e.keyCode == 38 && d != "DOWN") d = "UP";
+                else if (e.keyCode == 39 && d != "LEFT") d = "RIGHT";
+                else if (e.keyCode == 40 && d != "UP") d = "DOWN";
+            }
+
+            // Touch inputs
+            document.getElementById('btn-up').addEventListener('touchstart', () => { if(d != "DOWN") d = "UP"; });
+            document.getElementById('btn-down').addEventListener('touchstart', () => { if(d != "UP") d = "DOWN"; });
+            document.getElementById('btn-left').addEventListener('touchstart', () => { if(d != "RIGHT") d = "LEFT"; });
+            document.getElementById('btn-right').addEventListener('touchstart', () => { if(d != "LEFT") d = "RIGHT"; });
+
+            function draw() {
+                ctx.fillStyle = "#111";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < snake.length; i++) {
+                    ctx.fillStyle = (i == 0) ? "#00FF00" : "#FFFFFF";
+                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                }
+
+                ctx.fillStyle = "#FF0000";
+                ctx.fillRect(food.x, food.y, box, box);
+
+                let snakeX = snake[0].x;
+                let snakeY = snake[0].y;
+
+                if (d == "LEFT") snakeX -= box;
+                if (d == "UP") snakeY -= box;
+                if (d == "RIGHT") snakeX += box;
+                if (d == "DOWN") snakeY += box;
+
+                if (snakeX == food.x && snakeY == food.y) {
+                    score++;
+                    food = {
+                        x: Math.floor(Math.random() * 19 + 1) * box,
+                        y: Math.floor(Math.random() * 19 + 1) * box
+                    };
+                } else {
+                    snake.pop();
+                }
+
+                let newHead = { x: snakeX, y: snakeY };
+
+                if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                    clearInterval(currentGameInterval);
+                    gameOverScreen(score);
+                    return;
+                }
+
+                snake.unshift(newHead);
+            }
+
+            function collision(head, array) {
+                for (let i = 0; i < array.length; i++) {
+                    if (head.x == array[i].x && head.y == array[i].y) return true;
+                }
+                return false;
+            }
+
+            currentGameInterval = setInterval(draw, 130);
+        }
+
+        // --- GAME 2: BRICK BREAKER ---
+        function startBricks() {
+            menuContainer.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            clearCurrentGame();
+
+            touchControls.innerHTML = `
+                <div class="brk-controls">
+                    <div class="brk-btn" id="brk-left">LEFT</div>
+                    <div class="brk-btn" id="brk-right">RIGHT</div>
+                </div>
+            `;
+
+            let paddleHeight = 10;
+            let paddleWidth = 75;
+            let paddleX = (canvas.width - paddleWidth) / 2;
+            let rightPressed = false;
+            let leftPressed = false;
+
+            let x = canvas.width / 2;
+            let y = canvas.height - 30;
+            let dx = 3;
+            let dy = -3;
+            let ballRadius = 6;
+
+            let brickRowCount = 4;
+            let brickColumnCount = 5;
+            let brickWidth = 65;
+            let brickHeight = 15;
+            let brickPadding = 10;
+            let brickOffsetTop = 30;
+            let brickOffsetLeft = 20;
+            let score = 0;
+
+            let bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
+            }
+
+            document.addEventListener("keydown", keyDownHandler);
+            document.addEventListener("keyup", keyUpHandler);
+
+            function keyDownHandler(e) {
+                if (e.keyCode == 39) rightPressed = true;
+                else if (e.keyCode == 37) leftPressed = true;
+            }
+            function keyUpHandler(e) {
+                if (e.keyCode == 39) rightPressed = false;
+                else if (e.keyCode == 37) leftPressed = false;
+            }
+
+            // Touch event listeners
+            const bLeft = document.getElementById('brk-left');
+            const bRight = document.getElementById('brk-right');
+            bLeft.addEventListener('touchstart', (e) => { e.preventDefault(); leftPressed = true; });
+            bLeft.addEventListener('touchend', () => leftPressed = false);
+            bRight.addEventListener('touchstart', (e) => { e.preventDefault(); rightPressed = true; });
+            bRight.addEventListener('touchend', () => rightPressed = false);
+
+            function collisionDetection() {
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        let b = bricks[c][r];
+                        if (b.status == 1) {
+                            if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                                dy = -dy;
+                                b.status = 0;
+                                score++;
+                                if (score == brickRowCount * brickColumnCount) {
+                                    clearInterval(currentGameInterval);
+                                    gameOverScreen("WIN!");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.fillStyle = "#111";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Bricks
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        if (bricks[c][r].status == 1) {
+                            let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                            let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                            bricks[c][r].x = brickX;
+                            bricks[c][r].y = brickY;
+                            ctx.fillStyle = "#00FF00";
+                            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+                        }
+                    }
+                }
+
+                // Draw Ball
+                ctx.beginPath();
+                ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+                ctx.closePath();
+
+                // Draw Paddle
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
+
+                collisionDetection();
+
+                if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+                if (y + dy < ballRadius) dy = -dy;
+                else if (y + dy > canvas.height - ballRadius - 5) {
+                    if (x > paddleX && x < paddleX + paddleWidth) {
+                        dy = -dy;
+                    } else {
+                        clearInterval(currentGameInterval);
+                        gameOverScreen(score);
+                        return;
+                    }
+                }
+
+                if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
+                else if (leftPressed && paddleX > 0) paddleX -= 5;
+
+                x += dx;
+                y += dy;
+            }
+
+            currentGameInterval = setInterval(draw, 15);
+        }
+
+        function gameOverScreen(finalScore) {
+            ctx.fillStyle = "#111";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = "18px monospace";
+            ctx.fillText("Result: " + finalScore, 130, canvas.height / 2 - 20);
+            
+            touchControls.innerHTML = `<button onclick="returnToMenu()">Menu</button>`;
+        }
+
+        function returnToMenu() {
+            gameContainer.style.display = 'none';
+            menuContainer.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
